@@ -3,7 +3,10 @@ const { app, ipcMain } = require("electron");
 const mainWindow = require("./mainWindow");
 const readItem = require("./readItem");
 
-require("electron-reload")(__dirname);
+const env = "Prod";
+if (env === "Dev") {
+  require("electron-reload")(__dirname);
+}
 
 ipcMain.on("new-item", function(e, itemURL) {
   // Get read item with readItem module
