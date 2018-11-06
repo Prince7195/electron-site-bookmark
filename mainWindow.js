@@ -1,7 +1,7 @@
 const { BrowserWindow } = require("electron");
 const devtron = require("devtron");
 
-const env = "Dev";
+const env = "Prod";
 
 // BrowserWindow Inastance
 exports.win;
