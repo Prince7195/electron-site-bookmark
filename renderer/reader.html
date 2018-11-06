@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../bower_components//bulma/css/bulma.css">
+    <link rel="stylesheet" href="../bower_components/font-awesome/web-fonts-with-css/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="main.css">
+    <style>
+        html,
+        body,
+        webview {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="loader" class="hero is-fullheight has-text-centered">
+        <div class="hero-body">
+            <div class="container">
+
+                <div class="busy">
+                    <h1 class="title">
+                        <span class="icon is-large">
+                            <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                        </span>
+                    </h1>
+                </div>
+
+                <div class="failed is-hidden">
+                    <h1 class="title">Failed to Load</h1>
+                    <h2 class="subtitle">Please check your Network Connection</h2>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <a id="mark-read" class="is-hidden">
+        <div class="block">
+            <span class="tag is-large is-primary">
+                <span class="icon">
+                    <i class="fa fa-check fa-inverse"></i>
+                </span>&nbsp;Read
+            </span>
+        </div>
+    </a>
+    <webview src="about:blank"></webview>
+</body>
+<script>
+    // jquery
+    const $ = require("jquery");
+
+    // query-string module
+    const queryString = require("query-string");
+
+    // Parse query string
+    const queryParams = queryString.parse(location.search);
+
+    // Get item index
+    let itemIndex = queryParams.itemIndex;
+
+    // get query string 'url'
+    let url = decodeURIComponent(queryParams.url);
+
+    $("webview").one("dom-ready", function (e) {
+        // Load item content url to webview
+        e.currentTarget.loadURL(url);
+    }).one("did-finish-load", function () {
+        // Hibe the loader to reveal webview
+        $("#loader").fadeOut(100);
+        $("#mark-read").removeClass("is-hidden");
+    }).on("did-fail-load", function () {
+        $("#mark-read").addClass("is-hidden");
+        $("#loader .busy").addClass("is-hidden");
+        $("#loader").fadeIn(100);
+        $("#loader .failed").removeClass("is-hidden")
+    });
+
+    $("#mark-read").click(function () {
+        // Parent window
+        window.opener.eval(`deleteItem(${itemIndex})`);
+        window.close();
+    });
+</script>
+
+</html>

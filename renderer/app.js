@@ -1,5 +1,6 @@
 const { ipcRenderer } = require("electron");
 const items = require("./items");
+const menu = require("./menu");
 
 // Navigate selected item with up and down
 $(document).keydown(function(e) {
@@ -52,7 +53,7 @@ ipcRenderer.on("new-item-success", function(e, item) {
   // Close and Reset modal
   $("#add-modal").removeClass("is-active");
   $("#item-input")
-    .prop("disable", false)
+    .prop("disabled", false)
     .val("");
   $("#add-button").removeClass("is-loading");
   $(".close-add-modal").removeClass("is-disabled");

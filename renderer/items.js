@@ -17,7 +17,9 @@ exports.addItem = function(item) {
   $("#no-items").hide();
 
   // New item html
-  let itemHTML = `<a class="panel-block read-item" data-url=${item.url}>
+  let itemHTML = `<a class="panel-block read-item" data-url="${
+    item.url
+  }" data-title="${item.title}">
                     <figure class="image has-shadow is-64x64 thumb">
                       <img src="${item.screenshot}">
                     </figure>
@@ -31,7 +33,7 @@ exports.addItem = function(item) {
   $(".read-item")
     .off("click, dblclick")
     .on("click", this.selectItem)
-    .on("dblclick", this.openItem);
+    .on("dblclick", window.openItem);
 };
 
 // Select next/prev item
@@ -53,16 +55,71 @@ exports.changeItem = function(direction) {
 };
 
 // Open item for reading
-exports.openItem = function() {
+window.openItem = function() {
+  toreadItems = JSON.parse(localStorage.getItem("toreadItems")) || [];
   // Only item have been added
-  if (!this.toreadItems.length) return;
+  if (this.toreadItems && this.toreadItems.length === 0) return;
 
   // get selected item
   let targetItem = $(".read-item.is-active");
 
   // get item's url
-  let contentUrl = targetItem.data("url");
+  let contentUrl = encodeURIComponent(targetItem.data("url"));
 
-  console.log("Opening item");
-  console.log(contentUrl);
+  // get item index to pass to proxy window
+  let itemIndex = targetItem.index() - 1;
+
+  // Reader window URL
+  let readerWinURL = `file://${__dirname}/reader.html?url=${contentUrl}&itemIndex=${itemIndex}`;
+
+  // Open item in new proxy BrowserWindow
+  let readerWin = window.open(readerWinURL, targetItem.data("title"));
+};
+
+// Window function
+// Delete item by index
+window.deleteItem = function(index = false) {
+  // Set index to active item if not passed as argument
+  if (index === false) {
+    // get current active item
+    let activeItem = $(".read-item.is-active");
+    index = activeItem.index() - 1;
+  }
+
+  // Remove item from DOM
+  $(".read-item")
+    .eq(index)
+    .remove();
+
+  // Remove from toreadItems array
+  this.toreadItems = this.toreadItems.filter((item, i) => i !== index);
+
+  // Update storage
+  localStorage.setItem("toreadItems", JSON.stringify(this.toreadItems));
+
+  // select prev or none if list empty
+  if (this.toreadItems && this.toreadItems.length > 0) {
+    // If first item was deleted, select new first itemin list, else prev item
+    let newIndex = index === 0 ? 0 : index - 1;
+
+    // Assign active class to new index
+    $(".read-item")
+      .eq(newIndex)
+      .addClass("is-active");
+  } else {
+    $("#no-items").show();
+  }
+};
+
+// Open item in default Browser
+window.openInBrowser = function() {
+  toreadItems = JSON.parse(localStorage.getItem("toreadItems")) || [];
+  // Only item have been added
+  if (this.toreadItems && this.toreadItems.length === 0) return;
+
+  // get selected item
+  let targetItem = $(".read-item.is-active");
+
+  // Open in Browser
+  require("electron").shell.openExternal(targetItem.data("url"));
 };
