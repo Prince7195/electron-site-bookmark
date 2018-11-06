@@ -2,12 +2,16 @@
 const { app, ipcMain } = require("electron");
 const reload = require("electron-reload");
 const mainWindow = require("./mainWindow");
+const readItem = require("./readItem");
 
 reload(__dirname);
 
 ipcMain.on("new-item", function(e, itemURL) {
-  console.log("Received new item on main");
-  console.log(itemURL);
+  // Get read item with readItem module
+  readItem(itemURL, function(item) {
+    // send to renderer
+    e.sender.send("new-item-success", item);
+  });
 });
 
 // This method will be called when Electron has finished
